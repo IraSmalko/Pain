@@ -28,9 +28,9 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-      //  rv.adapter = adapter
+        //  rv.adapter = adapter
 
-  //      val list = mutableListOf<Flowable<Weather>>()
+        //      val list = mutableListOf<Flowable<Weather>>()
 
         lastAdapter = LastAdapter(listWeather, BR.item)
                 .map<Weather>(R.layout.rv_item)
@@ -94,16 +94,20 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun y(): Unit {
+        val startTime = System.currentTimeMillis()
         Flowable.concat(list)
                 .observeOn(AndroidSchedulers.mainThread())
+                .doOnComplete { Log.d("MY_LOG", (System.currentTimeMillis() - startTime).toString()) }
                 .subscribe({ r -> displayResult(r) },
                         { error -> Log.e("TAG", "{$error.message}") })
 
     }
 
     private fun z(): Unit {
+        val startTime = System.currentTimeMillis()
         Flowable.merge(list)
                 .observeOn(AndroidSchedulers.mainThread())
+                .doOnComplete { Log.d("MY_LOG", (System.currentTimeMillis() - startTime).toString()) }
                 .subscribe({ r -> displayResult(r) },
                         { error -> Log.e("TAG", "{$error.message}") })
 
@@ -112,27 +116,26 @@ class MainActivity : AppCompatActivity() {
 
     private fun displayResult(result: Weather) {
         ++i
-       listWeather.add(result)
+        listWeather.add(result)
         lastAdapter.notifyDataSetChanged()
-     //   adapter.updateAdapter(result)
         if (i == 8 && !f) {
             stopwatch.stop()
             concatTime = stopwatch.elapsedTime.toDouble()
             Toast.makeText(this, "concat " + concatTime.toString(), Toast.LENGTH_LONG).show()
-       //     adapter.items.clear()
+            //     adapter.items.clear()
             listWeather.clear()
             list.clear()
             i = 0
             f = true
             x()
-        }else if (i == 8 && f) {
+        } else if (i == 8 && f) {
             stopwatch.stop()
             mergeTime = stopwatch.elapsedTime.toDouble()
             Toast.makeText(this, "merge " + mergeTime.toString(), Toast.LENGTH_LONG).show()
-            if (concatTime > mergeTime){
+            if (concatTime > mergeTime) {
                 Toast.makeText(this, "merge winner! with the score: " + (concatTime - mergeTime).toString() + "\n" +
-                       "%.2f".format(concatTime / mergeTime) + " times faster!", Toast.LENGTH_LONG).show()
-            }else  Toast.makeText(this, "concat winner! with the score: " + (mergeTime - concatTime).toString() + "\n" +
+                        "%.2f".format(concatTime / mergeTime) + " times faster!", Toast.LENGTH_LONG).show()
+            } else Toast.makeText(this, "concat winner! with the score: " + (mergeTime - concatTime).toString() + "\n" +
                     "%.2f".format(mergeTime / concatTime) + " times faster!", Toast.LENGTH_LONG).show()
         }
     }
